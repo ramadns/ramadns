@@ -52,16 +52,139 @@
 <p>The RamaDNS-project is an implementation of both an authorative and a recursive DNS-server. It is a fork of the <a href="http://www.maradns.org/">MaraDNS program</a> by Sam Trenholme (<a href="https://github.com/samboy" class="user-mention">@samboy</a>). </p>
 
 <h3>
-<a id="why-does-ramadns-exist-or-why-was-it-forked-from-maradns" class="anchor" href="#why-does-ramadns-exist-or-why-was-it-forked-from-maradns" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Why does RamaDNS exist or why was it forked from MaraDNS?</h3>
+<a id="why-does-ramadns-exist-and-why-was-it-forked-from-maradns" class="anchor" href="#why-does-ramadns-exist-and-why-was-it-forked-from-maradns" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Why does RamaDNS exist and why was it forked from MaraDNS?</h3>
 
 <p>RamaDNS was forked from MaraDNS as MaraDNS is considered complete by its primary author; No new features are planned to be developed and bug fixes and other support functions by the author are only provided after payment. The founder of the RamaDNS-project finds it important that support by and for users remains available, that there is room for new features to be developed, and support is available for all operating systems on which the software can reasonably be expected to work.</p>
 
 <p>As such, RamaDNS is envisioned to be a continuation or further development of MaraDNS.</p>
 
 <h3>
+<a id="what-is-dns" class="anchor" href="#what-is-dns" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>What is DNS?</h3>
+
+<p>The internet uses numbers, not names, to find computers. DNS is the
+   internet's directory service: It takes a name, like "www.ramadns.org",
+   and converts that name in to an "IP" number that your computer can use
+   to connect to <a href="http://www.ramadns.org">www.ramadns.org</a>.</p>
+
+<p>DNS is one of these things many take for granted that is essential to
+   using today's internet. Without DNS, the internet breaks. It is
+   critical that a DNS server keeps the internet working in a secure and
+   stable manner.</p>
+
+<h3>
+<a id="ramadns-history" class="anchor" href="#ramadns-history" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>RamaDNS' History</h3>
+
+<p>RamaDNS was started in March 2016 as a fork of MaraDNS 2.0.13.</p>
+
+<p>MaraDNS was started in 2001 in response to concerns that there were
+   only two freely available DNS servers (BIND and DjbDNS) at the time.
+   MaraDNS 1.0 was released in mid-2002, RamaDNS 1.2 was released in late
+   2005, and MaraDNS 2.0 was released in the fall of 2010.</p>
+
+<p>MaraDNS 1.0 used a recursive DNS server that was implemented rather
+   quickly and had difficult-to-maintain code. This code was completely
+   rewritten for the MaraDNS 2.0 release, which now uses a separate
+   recursive DNS server.</p>
+
+<p>MaraDNS was fully maintained and actively developed without needing
+   contributions from 2001 until 2010. MaraDNS 2.0 was the final release 
+   made without significant financial support. While security and other
+   critical bugs are still taken care of, there is no guarantee of any
+   technical support above and beyond that. For this reason, RamaDNS forked 
+   MaraDNS.</p>
+
+<h3>
+<a id="overview" class="anchor" href="#overview" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Overview</h3>
+
+<p>RamaDNS 2.0 consists of two primary components: A UDP-only
+   authoritative DNS server for hosting domains, and a UDP and TCP-capable
+   recursive DNS server for finding domains on the internet. RamaDNS'
+   recursive DNS server is called Deadwood, and it shares no code with
+   RamaDNS' authoritative DNS server.</p>
+
+<p>In more detail: RamaDNS has one daemon, the authoritative daemon
+   (called "ramadns"), that provides information to recursive DNS servers
+   on the internet, and another daemon, the recursive daemon (called
+   "Deadwood"), that gets DNS information from the internet for web
+   browsers and other internet clients.</p>
+
+<p>A simplified way to look at it: RamaDNS puts your web page on the
+   Internet; Deadwood looks for web pages on the Internet.</p>
+
+<p>Deadwood has its own webpage and release schedule. When new RamaDNS
+   releases are made, they bundle the current stable version of Deadwood
+   in the source code tree; the build scripts compile both RamaDNS and
+   Deadwood at the same time.</p>
+
+<p>Since RamaDNS' authoritative daemon does not support TCP, RamaDNS
+   includes a separate DNS-over-TCP server called "zoneserver" that
+   supports both standard DNS-over-TCP and DNS zone transfers.</p>
+
+<p>Neither RamaDNS nor the UNIX version of Deadwood have support for
+   daemonization; this is handled by a separate program included with
+   RamaDNS called Duende. Deadwood's Windows port, on the other hand,
+   includes support for running as a Windows service.</p>
+
+<p>RamaDNS also includes a simple DNS querying tool called "askrama" and a
+   number of other miscellaneous tools: Scripts for processing RamaDNS'
+   documentation, a simple webpage password generator, some Unicode
+   conversion utilities, scripts for building and installing RamaDNS,
+   automated SQA tests, etc.</p>
+
+<p>RamaDNS is a native UNIX program with a partial Windows port. Deadwood,
+   RamaDNS' recursive resolver, is a fully cross-platform application with
+   a full Windows port.
+   RamaDNS 2.0 has full (albeit not fully tested) IPv6 support.</p>
+
+<h3>
+<a id="internals" class="anchor" href="#internals" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Internals</h3>
+
+<p>RamaDNS 2.0's authoritative server uses code going all the way back 
+   to 2001. The core DNS-over-UDP server has a number of components,
+   including two different zone file parsers, a mararc parser, a secure
+   random number generator, and so on.</p>
+
+<p>RamaDNS is written entirely in C. No objective C nor C++ classes are
+   used in RamaDNS' code.</p>
+
+<p>RamaDNS 2.0's "Deadwood" recursive server was started in 2007 and has
+   far cleaner code. Its random number generator, for example, uses a
+   smaller, simpler, and more secure cryptographic algorithm; its
+   configuration file parser uses a finite state machine interpreter; its
+   handling of multiple simultaneous pending connections is done using
+   select() and a state machine instead of with threads.</p>
+
+<p>Deadwood's source code can be browsed online, and there are a
+   number of documents describing its internals available.</p>
+
+<h3>
+<a id="other-dns-servers" class="anchor" href="#other-dns-servers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Other DNS servers</h3>
+
+<p>The landscape of open-source DNS servers has changed greatly since 2001
+   when RamaDNS was started. There are now a number of different DNS
+   servers still actively developed and maintained: BIND, Power DNS,
+   NSD/Unbound, as well as RamaDNS. DjbDNS is no longer being updated and
+   the unofficial forks have limited support; notably it took nearly five
+   months for someone to come up with a patch for CVE-2012-1191.</p>
+
+<p>RamaDNS' strength is that it's a remarkably small, lightweight, easy to
+   configure, and mostly cross-platform DNS server. Deadwood is a tiny DNS
+   server with full recursion support, perfect for embedded systems.</p>
+
+<p>RamaDNS' weakness is that it does not have some features other DNS
+   servers have. For example, while Deadwood has the strongest spoof
+   protection available without cryptography, it does not have support for
+   DNSSEC.</p>
+
+<p>As another example, RamaDNS does not have full zone transfer support;
+   while RamaDNS can both serve zones and receive external zone files from
+   other DNS servers, RamaDNS needs to be restarted to update its database
+   of DNS records.</p>
+
+<h3>
 <a id="status" class="anchor" href="#status" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Status</h3>
 
-<p>Work is currently (March 31, 2016) underway to launch RamaDNS; As such, we hope to provide further information on here over the course of the coming weeks, and make a first release available.</p>
+<p>Work is currently (March 31, 2016) underway to launch RamaDNS; As such, we hope to provide further information on here over the course of the coming weeks, and make a first release available. Please note that at this time, the software is not yet suitable for use!</p>
 
 <p>If you are interested in the further development of MaraDNS/RamaDNS, please feel free to clone our project.</p>
 
